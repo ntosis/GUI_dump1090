@@ -4,14 +4,13 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = TryToUseRTLSDRwithQT
 TEMPLATE = app
-CONFIG += thread #jkl;'
-
+CONFIG += thread
 SOURCES += main.cpp\
         mainwindow.cpp
 

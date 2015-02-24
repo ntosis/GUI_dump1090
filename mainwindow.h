@@ -16,8 +16,6 @@
 #include <QTimer>
 #include <QMouseEvent>
 #include <QVector>
-#include <QTcpSocket>
-
 
 
 #define MODES_AUTO_GAIN            -100         /* Use automatic gain. */
@@ -139,10 +137,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    void *readTCPdata(void);
     void *mainloopC(void);
-
-    //static void* readerThreadEntryPoint(void *arg) { return ((MainWindow*)arg)->readTCPdata(); }//in C++ i think work only as static
     static void *readerThreadEntryPoint(void *arg);
     static void *procThreadEntryPoint(void *arg) { return ((MainWindow*)arg)->mainloopC(); }//in C++ i think work only as static
     explicit MainWindow(QWidget *parent = 0);    ~MainWindow();
@@ -151,7 +146,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QTcpSocket *socket;
     void modesInitRTLSDR(void);
     void modesInitConfig(void);
     void modesInit(void);
@@ -159,7 +153,6 @@ private:
     static long long mstime(void);
     void interactiveRemoveStaleAircrafts(void);
     void interactiveShowData(void);
-    //**void mainloopC(void);
    // static void *readerThreadEntryPoint(void *arg); //in C++ i think work only as static
     static void rtlsdrCallback(unsigned char *buf, uint32_t len, void *ctx); //in C++ i think work only as static
     void computeMagnitudeVector(void);
@@ -192,7 +185,8 @@ private:
     int cprNFunction(double lat, int isodd);
     int cprNLFunction(double lat);
     int cprModFunction(int a, int b);
-//GUIs functions
+
+    //GUIs functions
     void addTreeRoot(QStringList B);
     void closeEvent ( QCloseEvent * event );
     QVector<aircraft> AirplanesVector;

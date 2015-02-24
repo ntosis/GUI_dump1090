@@ -98,15 +98,6 @@ MainWindow::MainWindow(QWidget *parent) :
     pthread_create(&Modes.proccess_thread, NULL, procThreadEntryPoint, this);
 
     pthread_mutex_lock(&Modes.data_mutex);
-    //mainloopC(); //this is the try to simulate the main(); in C code
-    //QTimer *timer = new QTimer(this);
-    //connect(timer, SIGNAL(timeout()), this, SLOT(mainloopC()));
-    //timer->start(50);
-    QTimer *timer_2 = new QTimer(this);
-    connect(timer_2, SIGNAL(timeout()), this, SLOT(clearGUIComboBox()));
-    timer_2->start(60000);
-    socket = new QTcpSocket(this);
-    socket->connectToHost("127.0.0.1",5000);
 
 
 }
@@ -133,15 +124,6 @@ void MainWindow::modesInitRTLSDR()
             if(i==QMessageBox::Ok) exit(1);
         }
 
-      //  QString status = QString("Found %1 device(s):").arg(device_count);
-      //  QMessageBox::information(this, tr("Info"), status);
-        /*
-        for (j = 0; j < device_count; j++) {
-
-            fprintf(stderr, "%d: %s, %s, SN: %s %s\n", j, vendor, product, serial,
-                (j == Modes.dev_index) ? "(currently selected)" : "");
-        }
-        */
         if (rtlsdr_open(&Modes.dev, Modes.dev_index) < 0) {
             int i= QMessageBox::critical(this, tr("Error"), tr("Error opening the RTLSDR device."), QMessageBox::Ok);
            if(i==QMessageBox::Ok) exit(1);
@@ -299,19 +281,8 @@ void MainWindow::interactiveRemoveStaleAircrafts()
 void MainWindow::interactiveShowData()
 {
     struct aircraft *a = Modes.aircrafts;
-    time_t now = time(NULL);
-    char progress[4];
     int count = 0;
 
-    memset(progress,' ',3);
-    progress[time(NULL)%3] = '.';
-    progress[3] = '\0';
-
-   // printf("\x1b[H\x1b[2J");    /* Clear the screen */
-  /*  printf(
-"Hex    Flight   Altitude  Speed   Lat       Lon       Track  Messages Seen %s\n"
-"--------------------------------------------------------------------------------\n",
-        progress); */
     ui->treeWidget->clear();
     AirplanesVector.clear();
     while(a && count < Modes.interactive_rows) {
@@ -323,25 +294,17 @@ void MainWindow::interactiveShowData()
             speed *= 1.852;
         }
 
-      /*  printf("%-6s %-8s %-9d %-7d %-7.03f   %-7.03f   %-3d   %-9ld %d sec\n",
-            a->hexaddr, a->flight, altitude, speed,
-            a->lat, a->lon, a->track, a->messages,
-            (int)(now - a->seen)); */
-        //qDebug() << a->hexaddr;
+        // Convert the important infos in a String List (B) and call addTreeRoot
         QString Speed,Alt,Lon,Lat,Name;
         Name=a->flight;
         Speed.setNum(a->speed,10); Alt.setNum(a->altitude,10); Lon.setNum(a->lon);Lat.setNum(a->lat);
         QStringList B; B << a->hexaddr << a->flight  << Speed << Alt << Lon << Lat ;
         if(Name.length()>1) {
-            //qDebug() << a->flight;
-          // addTreeRoot(B);
+
         int i = ReturnIndexOfSearch(Name);
         if(i>-1) {AirplanesVector.replace(i,*a); } else {AirplanesVector.push_back(*a);}
         }
-        //if(Name==flightNameChoosed) addTreeRoot(B);
         if(Name.size()>3) addTreeRoot(B);
-
-        //ui->listOfAirplanes->addItem(Name);
         a = a->next;
         count++;
     }
@@ -1303,9 +1266,6 @@ void MainWindow::addTreeRoot(QStringList B)
 {
     //add a new row into GUI treeWidget
     QTreeWidgetItem *treeItem = new QTreeWidgetItem(ui->treeWidget,B,0);
-
-   //ui->treeWidget->addChild(treeItem);
-
 }
 
 /* The NL function uses the precomputed table from 1090-WP-9-14 */
@@ -1383,28 +1343,6 @@ double MainWindow::cprDlonFunction(double lat, int isodd) {
 }
 void *MainWindow::mainloopC()
 {
-
-    /* Set sane defaults. */
-    //----------------------modesInitConfig(); //Moved in Constructor
-
-
-    //**ToCunstr**// Modes.interactive = 1;
-
-
-
-
-
-
-    /* Initialization */
-    //--------------------------modesInit(); //moved in Constructor
-
-    //**toConstruct** modesInitRTLSDR();
-
-
-    /* Create the thread that will read the data from the device. */
-    //**toCunstr//  pthread_create(&Modes.reader_thread, NULL, readerThreadEntryPoint, NULL);
-
-   //**toConstr**// pthread_mutex_lock(&Modes.data_mutex);
     while(1) {
         if (!Modes.data_ready) {
             pthread_cond_wait(&Modes.data_cond,&Modes.data_mutex);
@@ -1426,10 +1364,6 @@ void *MainWindow::mainloopC()
         backgroundTasks();
         pthread_mutex_lock(&Modes.data_mutex);
     }
-
-
-
-        //to destruct//  rtlsdr_close(Modes.dev);
 }
 
 
