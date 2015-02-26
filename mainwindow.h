@@ -16,7 +16,7 @@
 #include <QTimer>
 #include <QMouseEvent>
 #include <QVector>
-
+#include <QElapsedTimer>
 
 #define MODES_AUTO_GAIN            -100         /* Use automatic gain. */
 #define MODES_MAX_GAIN             999999       /* Use max available gain. */

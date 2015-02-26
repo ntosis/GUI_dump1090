@@ -298,7 +298,7 @@ void MainWindow::interactiveShowData()
         QString Speed,Alt,Lon,Lat,Name;
         Name=a->flight;
         Speed.setNum(a->speed,10); Alt.setNum(a->altitude,10); Lon.setNum(a->lon);Lat.setNum(a->lat);
-        QStringList B; B << a->hexaddr << a->flight  << Speed << Alt << Lon << Lat ;
+        QStringList B; B << a->hexaddr << a->flight  << Speed+" Kt" << Alt+" ft" << Lon << Lat ;
         if(Name.length()>1) {
 
         int i = ReturnIndexOfSearch(Name);
@@ -330,19 +330,26 @@ qDebug()<<"Thread";
 void MainWindow::rtlsdrCallback(unsigned char *buf, uint32_t len, void *ctx)
 {
         MODES_NOTUSED(ctx);
-
+        //QFile f("RTLSDR_outstream.txt");
+        //QTextStream out(&f);
         pthread_mutex_lock(&Modes.data_mutex);
         if (len > MODES_DATA_LEN) len = MODES_DATA_LEN;
         /* Move the last part of the previous buffer, that was not processed,
          * on the start of the new buffer. */
         memcpy(Modes.data, Modes.data+MODES_DATA_LEN, (MODES_FULL_LEN-1)*4);
         /* Read the new data. */
-        char f = buf[10];
         memcpy(Modes.data+(MODES_FULL_LEN-1)*4, buf, len);
         uint8_t *p =Modes.data;
+        int j=0;
+        //if(f.open(QIODevice::Append)) {
+          //  while(j<100) out << p[j++] << " ";
+        //out<< endl;
+       // }
+
         // QString s(data);
        // qDebug()<<"Data Size: " << p[2] << buf[2]<< endl;
         Modes.data_ready = 1;
+       // f.close();
         /* Signal to the other thread that new data is ready */
         pthread_cond_signal(&Modes.data_cond);
         pthread_mutex_unlock(&Modes.data_mutex);
@@ -411,6 +418,8 @@ void MainWindow::detectModeS(uint16_t *m, uint32_t mlen)
         /* First check of relations between the first 10 samples
          * representing a valid preamble. We don't even investigate further
          * if this simple test is not passed. */
+      // for(int ki=0; ki<10; ki++) qDebug()<< m[j+ki];
+
         if (!(m[j] > m[j+1] &&
             m[j+1] < m[j+2] &&
             m[j+2] > m[j+3] &&
@@ -865,6 +874,7 @@ void MainWindow::decodeModesMessage(modesMessage *mm, unsigned char *msg)
  * further processing and visualization. */
 void MainWindow::useModesMessage(modesMessage *mm)
 {
+   // qDebug()  << mm->crcok;
     if (!Modes.stats && (Modes.check_crc == 0 || mm->crcok)) {
         /* Track aircrafts in interactive mode or if the HTTP
          * interface is enabled. */
@@ -880,7 +890,6 @@ aircraft *MainWindow::interactiveReceiveData(modesMessage *mm)
 {
     uint32_t addr;
     struct aircraft *a, *aux;
-
     if (Modes.check_crc && mm->crcok == 0) return NULL;
     addr = (mm->aa1 << 16) | (mm->aa2 << 8) | mm->aa3;
 
