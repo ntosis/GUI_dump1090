@@ -89,7 +89,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+    QButtonGroup *speed = new QButtonGroup(this);
+    QButtonGroup *altitude = new QButtonGroup(this);
+    speed->addButton(ui->rBkmh);  speed->addButton(ui->rBknots); speed->addButton(ui->rBmph);
+    altitude->addButton(ui->rBft); altitude->addButton(ui->rBmeters);
+    ui->rBknots->setChecked(true); ui->rBft->setChecked(true);
     modesInitConfig();
     modesInit();
     Modes.interactive = 1;
@@ -298,7 +302,8 @@ void MainWindow::interactiveShowData()
         QString Speed,Alt,Lon,Lat,Name;
         Name=a->flight;
         Speed.setNum(a->speed,10); Alt.setNum(a->altitude,10); Lon.setNum(a->lon);Lat.setNum(a->lat);
-        QStringList B; B << a->hexaddr << a->flight  << Speed+" Kt" << Alt+" ft" << Lon << Lat ;
+
+        QStringList B; B << a->hexaddr << a->flight  << returnSpeed(a->speed) << returnAltitude(a->altitude) << Lon << Lat ;
         if(Name.length()>1) {
 
         int i = ReturnIndexOfSearch(Name);
@@ -314,7 +319,7 @@ void MainWindow::interactiveShowData()
  * without caring about data acquisition. */
 void *MainWindow::readerThreadEntryPoint(void *arg) {
     MODES_NOTUSED(arg);
-qDebug()<<"Thread";
+   //qDebug()<<"Thread";
     if (Modes.filename == NULL) {
         rtlsdr_read_async(Modes.dev, rtlsdrCallback, NULL,MODES_ASYNC_BUF_NUMBER,MODES_DATA_LEN);
     }
@@ -1391,6 +1396,21 @@ int MainWindow::ReturnIndexOfSearch(QString Name) {
                  }
 
     } else return -1;
+}
+
+QString MainWindow::returnSpeed(int speed)
+{
+    QString unit;
+    if(ui->rBknots->isChecked()) return unit.setNum(speed,10) + " Kt";
+    if(ui->rBkmh->isChecked()) return unit.setNum(double(speed*1.852),'f',2) + " Km/h";
+    else if(ui->rBmph->isChecked()) return unit.setNum(double(speed*1.15077945),'f',2) + " mph";
+}
+
+QString MainWindow::returnAltitude(int altitude)
+{
+    QString unit;
+    if(ui->rBft->isChecked()) return unit.setNum(altitude,10) + " ft";
+    else if(ui->rBmeters->isChecked()) return unit.setNum(double(altitude*0.3048),'f',2) +" m";
 }
 
 

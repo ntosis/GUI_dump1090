@@ -190,7 +190,10 @@ private:
     void addTreeRoot(QStringList B);
     void closeEvent ( QCloseEvent * event );
     QVector<aircraft> AirplanesVector;
-    int ReturnIndexOfSearch(QString Name);\
+    int ReturnIndexOfSearch(QString Name);
+    QString returnSpeed(int speed);
+    QString returnAltitude(int altitude);
+
 };
 
 #endif // MAINWINDOW_H
