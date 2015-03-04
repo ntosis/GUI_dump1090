@@ -1,4 +1,17 @@
-﻿#ifndef MAINWINDOW_H
+﻿/****************************************************************************
+* Copyright (C) 2015 Nikolaos Tosis
+* All rights reserved.
+* Contact: (ergasies.uni@gmail.com)
+*
+*
+* GNU General Public License Usage
+* This file may be used under the terms of the GNU General Public
+* License version 3.0 as published by the Free Software Foundation.
+* Please review the following information to ensure the
+* GNU General Public License version 3.0 requirements will be met:
+* http://www.gnu.org/copyleft/gpl.html. */
+
+#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include "rtl-sdr.h"
